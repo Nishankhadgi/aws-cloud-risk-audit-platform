@@ -1,0 +1,1003 @@
+{
+  "metadata": {
+    "platform": "AWS Cloud Infrastructure Security & Technology Risk Audit Platform",
+    "engagement_name": "Northstar Claims Technologies - Comprehensive AWS Infrastructure Audit",
+    "organization": "Northstar Claims Technologies",
+    "aws_account_id": "112233445566",
+    "assessed_regions": [
+      "us-east-1",
+      "us-west-2"
+    ],
+    "scan_timestamp": "2026-11-12T19:23:49.846962+00:00",
+    "is_sample_mode": true,
+    "disclaimer": "SIMULATED AUDIT DATA \u2014 NOT AN ACTUAL AWS AUDIT",
+    "auditor_role": "Senior IT Internal Auditor / AWS Cloud Security Architect",
+    "version": "1.0.0"
+  },
+  "summary": {
+    "total_checks": 19,
+    "passed": 10,
+    "failed": 4,
+    "partial": 4,
+    "not_tested": 0,
+    "not_applicable": 1,
+    "error": 0,
+    "critical_findings": 1,
+    "high_findings": 3
+  },
+  "results": [
+    {
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-ROOT-01",
+      "check_id": "CHK-IAM-01",
+      "domain": "IAM and Access Governance",
+      "resource_id": "arn:aws:iam::112233445566:root",
+      "resource_type": "AWS::IAM::RootUser",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "title": "Root Account Hardware/Virtual MFA Enforcement",
+      "description": "Verified that root account possesses active hardware MFA token and zero active access keys.",
+      "technical_evidence": {
+        "account_mfa_enabled": true,
+        "mfa_type": "Hardware TOTP (Gemalto)",
+        "root_access_keys_count": 0,
+        "last_root_login": "2026-09-14T08:12:00Z (Emergency Break-Glass Drill)"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Continue storing physical token in dual-custody corporate vault.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-02",
+      "check_id": "CHK-IAM-01",
+      "domain": "IAM and Access Governance",
+      "resource_id": "arn:aws:iam::112233445566:user/claims-lead-dev",
+      "resource_type": "AWS::IAM::User",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "FAIL",
+      "severity": "HIGH",
+      "title": "Console Access Enabled for Privileged Identity Without Active MFA",
+      "description": "IAM user claims-lead-dev has active console password authentication enabled but lacks enrolled MFA token.",
+      "technical_evidence": {
+        "user_name": "claims-lead-dev",
+        "password_enabled": true,
+        "password_last_used": "2026-11-08T14:22:18Z",
+        "mfa_devices": [],
+        "attached_policies": [
+          "arn:aws:iam::aws:policy/PowerUserAccess"
+        ]
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": "AWS-IAM-002",
+      "risk_recommendation": "Immediately enforce MFA requirement via IAM policy condition aws:MultiFactorAuthPresent or deactivate console password.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-01",
+      "check_id": "CHK-IAM-01",
+      "domain": "IAM and Access Governance",
+      "resource_id": "arn:aws:iam::112233445566:role/ClaimsPipelineDeployerRole",
+      "resource_type": "AWS::IAM::Role",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "FAIL",
+      "severity": "CRITICAL",
+      "title": "Excessive Wildcard Administrator Privileges Assigned to CI/CD Pipeline Role",
+      "description": "CI/CD deployment role ClaimsPipelineDeployerRole has AdministratorAccess (Action: *, Resource: *) attached instead of least-privilege service actions.",
+      "technical_evidence": {
+        "role_name": "ClaimsPipelineDeployerRole",
+        "attached_policies": [
+          "arn:aws:iam::aws:policy/AdministratorAccess"
+        ],
+        "inline_policies": {},
+        "trust_principal": "arn:aws:iam::112233445566:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": "AWS-IAM-001",
+      "risk_recommendation": "Refactor pipeline permissions using AWS IAM Access Analyzer into discrete least-privilege IAM policies scoped to deployment services.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-03",
+      "check_id": "CHK-IAM-01",
+      "domain": "IAM and Access Governance",
+      "resource_id": "arn:aws:iam::112233445566:role/ClaimsLambdaExecutionRole",
+      "resource_type": "AWS::IAM::Role",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "Microservice Execution Role Trust Boundary and Scoped Actions",
+      "description": "Lambda execution role adheres to least-privilege scoping: limited to reading claims queue and writing to claim-records DynamoDB table.",
+      "technical_evidence": {
+        "role_name": "ClaimsLambdaExecutionRole",
+        "trust_policy_service": "lambda.amazonaws.com",
+        "allowed_actions": [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "dynamodb:PutItem",
+          "logs:CreateLogStream"
+        ],
+        "wildcard_resources": false
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Maintain periodic automated review of role policy execution.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-04",
+      "check_id": "CHK-IAM-01",
+      "domain": "IAM and Access Governance",
+      "resource_id": "arn:aws:iam::112233445566:user/claims-batch-svc",
+      "resource_type": "AWS::IAM::User",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "PARTIAL",
+      "severity": "MEDIUM",
+      "title": "Service Account Access Key Age Exceeds Recommended 90-Day Rotation",
+      "description": "IAM programmatic access key AKIAEXAMPLE004B has been active for 142 days without key rotation.",
+      "technical_evidence": {
+        "user_name": "claims-batch-svc",
+        "access_key_id": "AKIAEXAMPLE004B",
+        "create_date": "2026-06-23T10:00:00Z",
+        "age_days": 142,
+        "last_used_service": "s3",
+        "status": "Active"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": "AWS-IAM-004",
+      "risk_recommendation": "Migrate legacy batch user to IAM Roles Anywhere or AWS Secrets Manager automated rotation every 90 days.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-DATA-01",
+      "test_id": "DATA-01",
+      "check_id": "CHK-S3-01",
+      "domain": "Data Protection",
+      "resource_id": "arn:aws:s3:::northstar-claims-documents-archive-prod",
+      "resource_type": "AWS::S3::Bucket",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "PARTIAL",
+      "severity": "MEDIUM",
+      "title": "S3 Claims Archive Bucket Missing Bucket-Level Public Access Block (Mitigated by Account PAB)",
+      "description": "Production bucket storing uploaded customer claims records lacks BlockPublicPolicy and RestrictPublicBuckets at bucket level. However, testing confirmed Account-Level Public Access Block is active across account 112233445566, operating as a compensating control to prevent internet exposure. Finding is classified as a Significant Deficiency in defense-in-depth.",
+      "technical_evidence": {
+        "bucket_name": "northstar-claims-documents-archive-prod",
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": false,
+        "RestrictPublicBuckets": false,
+        "account_level_pab_effective": true,
+        "false_positive_analysis": "Account-level PAB blocks public traffic. Severity calibrated from Critical to Medium Significant Deficiency.",
+        "audit_methodology_note": "Evaluated under IIA standards distinguishing direct exploitability from secondary hardening gaps."
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": "AWS-S3-001",
+      "risk_recommendation": "Update Terraform module to enforce all four S3 Block Public Access settings on northstar-claims-documents-archive-prod.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-DATA-01",
+      "test_id": "DATA-02",
+      "check_id": "CHK-S3-01",
+      "domain": "Data Protection",
+      "resource_id": "arn:aws:s3:::northstar-claims-app-assets-prod",
+      "resource_type": "AWS::S3::Bucket",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "S3 Web Static Assets Bucket Public Boundary & CloudFront OAI/OAC",
+      "description": "Static UI assets bucket restricts direct S3 reads and enforces CloudFront Origin Access Control (OAC) with KMS SSE.",
+      "technical_evidence": {
+        "bucket_name": "northstar-claims-app-assets-prod",
+        "all_pab_flags_true": true,
+        "origin_access_control": "arn:aws:cloudfront::112233445566:origin-access-control/E2VEXAMPLETWO",
+        "ssl_enforced": true
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Maintain quarterly policy regression monitoring.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-DATA-01",
+      "test_id": "DATA-03",
+      "check_id": "CHK-S3-01",
+      "domain": "Data Protection",
+      "resource_id": "arn:aws:s3:::northstar-claims-audit-logs-vault",
+      "resource_type": "AWS::S3::Bucket",
+      "aws_account": "112233445566",
+      "aws_region": "global",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "S3 Audit Logs Storage Immortality & Object Lock Verification",
+      "description": "Audit logging archival bucket enforces S3 Object Lock in Compliance Mode with 365-day retention period and MFA Delete.",
+      "technical_evidence": {
+        "bucket_name": "northstar-claims-audit-logs-vault",
+        "object_lock_enabled": true,
+        "retention_mode": "COMPLIANCE",
+        "retention_period_days": 365,
+        "versioning_status": "Enabled",
+        "mfa_delete": "Enabled"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Retain WORM compliance posture.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-ENC-01",
+      "test_id": "KMS-01",
+      "check_id": "CHK-KMS-01",
+      "domain": "Encryption and Key Management",
+      "resource_id": "arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01",
+      "resource_type": "AWS::KMS::Key",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "FAIL",
+      "severity": "MEDIUM",
+      "title": "Customer Managed KMS Master Key Missing Automated Key Rotation",
+      "description": "The primary symmetric CMK used for claims payload encryption at rest has automated annual rotation disabled, increasing cryptanalytic exposure window.",
+      "technical_evidence": {
+        "KeyId": "b498f82a-e837-4d92-965a-claimscrypto01",
+        "Description": "Claims Platform Primary CMK (PII and Financial Records)",
+        "KeyRotationEnabled": false,
+        "KeyState": "Enabled",
+        "CreationDate": "2025-01-10T12:00:00Z",
+        "KeySpec": "SYMMETRIC_DEFAULT",
+        "Origin": "AWS_KMS",
+        "supports_rotation": true,
+        "false_positive_analysis": "Confirmed key is symmetric AWS_KMS key eligible for rotation. Valid exception."
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": "AWS-KMS-001",
+      "risk_recommendation": "Enable KMS automatic annual key rotation via EnableKeyRotation API or Terraform configuration.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-ENC-01",
+      "test_id": "KMS-02",
+      "check_id": "CHK-KMS-01",
+      "domain": "Encryption and Key Management",
+      "resource_id": "arn:aws:kms:us-east-1:112233445566:key/f331c19d-761a-4c91-912b-auditlogkey02",
+      "resource_type": "AWS::KMS::Key",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "Audit Trail CMK Policy Separation and Rotation Compliance",
+      "description": "CloudTrail dedicated encryption key has annual rotation active and key policy strictly isolates crypto usage to CloudTrail service principal.",
+      "technical_evidence": {
+        "KeyId": "f331c19d-761a-4c91-912b-auditlogkey02",
+        "KeyRotationEnabled": true,
+        "KeyState": "Enabled",
+        "KeyPolicySeparation": "Verified dual-custody administrator delegation"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Maintain existing rotation policy.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-ENC-01",
+      "test_id": "KMS-03",
+      "check_id": "CHK-KMS-01",
+      "domain": "Encryption and Key Management",
+      "resource_id": "arn:aws:kms:us-east-1:112233445566:key/e991204a-8120-410a-88aa-claimssignkey03",
+      "resource_type": "AWS::KMS::Key",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "NOT_APPLICABLE",
+      "severity": "INFORMATIONAL",
+      "title": "Asymmetric Signing Key Ineligible for Automated AWS Key Rotation",
+      "description": "Claims settlement verification key uses asymmetric RSA_2048 key material. In accordance with AWS KMS design, automated rotation is not applicable.",
+      "technical_evidence": {
+        "KeyId": "e991204a-8120-410a-88aa-claimssignkey03",
+        "KeySpec": "RSA_2048",
+        "KeyUsage": "SIGN_VERIFY",
+        "Origin": "AWS_KMS",
+        "audit_conclusion": "Classified as NOT_APPLICABLE rather than FAIL, eliminating false-positive scan defect."
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Verify manual key retirement schedule.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-LOG-01",
+      "test_id": "LOG-01",
+      "check_id": "CHK-TRAIL-01",
+      "domain": "Security Logging and Monitoring",
+      "resource_id": "arn:aws:cloudtrail:us-east-1:112233445566:trail/northstar-primary-org-trail",
+      "resource_type": "AWS::CloudTrail::Trail",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PARTIAL",
+      "severity": "MEDIUM",
+      "title": "CloudTrail Incomplete Multi-Region Global Service Data Event Coverage",
+      "description": "Primary trail records management events across all regions, but S3 Data Events and Lambda invocation data events are omitted to contain log ingestion costs.",
+      "technical_evidence": {
+        "TrailARN": "arn:aws:cloudtrail:us-east-1:112233445566:trail/northstar-primary-org-trail",
+        "IsMultiRegionTrail": true,
+        "IsLogging": true,
+        "LogFileValidationEnabled": true,
+        "KmsKeyId": "arn:aws:kms:us-east-1:112233445566:key/f331c19d-761a-4c91-912b-auditlogkey02",
+        "ManagementEvents": true,
+        "S3DataEventsEnabled": false,
+        "LambdaDataEventsEnabled": false
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": "AWS-LOG-001",
+      "risk_recommendation": "Enable CloudTrail Data Events for sensitive S3 claims storage buckets to record object-level reads/writes for forensic reconstruction.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-MON-01",
+      "test_id": "MON-01",
+      "check_id": "CHK-MON-01",
+      "domain": "Security Logging and Monitoring",
+      "resource_id": "arn:aws:guardduty:us-east-1:112233445566:detector/12a849f2b874382e",
+      "resource_type": "AWS::GuardDuty::Detector",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "Amazon GuardDuty Continuous Machine-Learning Threat Detection Active",
+      "description": "GuardDuty detector is enabled in primary production region with CloudWatch EventBridge alerting hooked into PagerDuty.",
+      "technical_evidence": {
+        "detector_id": "12a849f2b874382e",
+        "status": "ENABLED",
+        "finding_publishing_frequency": "FIFTEEN_MINUTES",
+        "features": [
+          {
+            "name": "S3_DATA_EVENTS",
+            "status": "ENABLED"
+          },
+          {
+            "name": "EKS_AUDIT_LOGS",
+            "status": "ENABLED"
+          },
+          {
+            "name": "RUNTIME_MONITORING",
+            "status": "ENABLED"
+          }
+        ]
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Ensure secondary DR region (us-west-2) maintains identical detector configuration.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-MON-01",
+      "test_id": "MON-02",
+      "check_id": "CHK-MON-01",
+      "domain": "Security Logging and Monitoring",
+      "resource_id": "arn:aws:config:us-east-1:112233445566:recorder/default",
+      "resource_type": "AWS::Config::ConfigurationRecorder",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "AWS Config Continuous Resource State and Compliance Tracking Active",
+      "description": "AWS Config is actively recording configuration changes for all IAM, S3, RDS, KMS, and EC2 resources.",
+      "technical_evidence": {
+        "recorder_name": "default",
+        "recording": true,
+        "all_supported_resources": true,
+        "include_global_resource_types": true,
+        "last_successful_delivery_time": "2026-11-12T12:00:00Z"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Continue periodic evaluation of conformance packs.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-MON-01",
+      "test_id": "MON-03",
+      "check_id": "CHK-MON-01",
+      "domain": "Security Logging and Monitoring",
+      "resource_id": "arn:aws:securityhub:us-east-1:112233445566:hub/default",
+      "resource_type": "AWS::SecurityHub::Hub",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "AWS Security Hub Foundational Security Best Practices Standard Active",
+      "description": "Security Hub is enabled and ingests findings from GuardDuty, Inspector, and Config rules.",
+      "technical_evidence": {
+        "hub_arn": "arn:aws:securityhub:us-east-1:112233445566:hub/default",
+        "subscribed_standards": [
+          "arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/3.0.0",
+          "arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0"
+        ],
+        "overall_security_score": 87
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.844950+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Remediate remaining lower-priority findings reported in Hub.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-NET-01",
+      "test_id": "NET-01",
+      "check_id": "CHK-EC2-01",
+      "domain": "Vulnerability and Configuration Management",
+      "resource_id": "sg-09827384aef1729b1",
+      "resource_type": "AWS::EC2::SecurityGroup",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "FAIL",
+      "severity": "HIGH",
+      "title": "Security Group Permits Inbound SSH (Port 22) from Public Internet",
+      "description": "Security group claims-bastion-sg allows TCP port 22 inbound from CIDR 0.0.0.0/0, violating perimeter ingress controls.",
+      "technical_evidence": {
+        "GroupId": "sg-09827384aef1729b1",
+        "GroupName": "northstar-claims-bastion-sg",
+        "Description": "Legacy bastion host ingress rules",
+        "VpcId": "vpc-018274a9bc837190e",
+        "OffendingRule": {
+          "IpProtocol": "tcp",
+          "FromPort": 22,
+          "ToPort": 22,
+          "CidrIp": "0.0.0.0/0"
+        }
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.846962+00:00",
+      "finding_reference": "AWS-NET-001",
+      "risk_recommendation": "Decommission public SSH ingress; mandate AWS Systems Manager Session Manager with IAM authorization and CloudTrail session logging.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-NET-01",
+      "test_id": "NET-02",
+      "check_id": "CHK-EC2-01",
+      "domain": "Vulnerability and Configuration Management",
+      "resource_id": "arn:aws:ec2:us-east-1:112233445566:ebs-encryption",
+      "resource_type": "AWS::EC2::EBS",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "EBS Encryption by Default Active in Production Region",
+      "description": "EBS encryption by default is enforced in us-east-1, ensuring all newly provisioned EBS volumes are encrypted using AWS KMS.",
+      "technical_evidence": {
+        "EbsEncryptionByDefault": true,
+        "KmsKeyId": "arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01"
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.846962+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Maintain default encryption across all operational regions.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-DATA-02",
+      "test_id": "DATA-RDS-01",
+      "check_id": "CHK-RDS-01",
+      "domain": "Data Protection",
+      "resource_id": "arn:aws:rds:us-east-1:112233445566:db:northstar-claims-primary-pg",
+      "resource_type": "AWS::RDS::DBInstance",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PASS",
+      "severity": "LOW",
+      "title": "Production RDS PostgreSQL Cluster Storage Encryption Active",
+      "description": "Primary transactional claims database enforces KMS encryption at rest using Customer Managed Key with Multi-AZ automated failover enabled.",
+      "technical_evidence": {
+        "DBInstanceIdentifier": "northstar-claims-primary-pg",
+        "Engine": "postgres",
+        "EngineVersion": "15.4",
+        "StorageEncrypted": true,
+        "KmsKeyId": "arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01",
+        "PubliclyAccessible": false,
+        "MultiAZ": true,
+        "BackupRetentionPeriod": 30
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.846962+00:00",
+      "finding_reference": null,
+      "risk_recommendation": "Continue maintaining 30-day point-in-time recovery window.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    },
+    {
+      "control_id": "CTL-BCP-01",
+      "test_id": "BCP-01",
+      "check_id": "CHK-BCP-01",
+      "domain": "Business Continuity and Availability",
+      "resource_id": "arn:aws:backup:us-east-1:112233445566:backup-plan:0a84fb72-911e-4c28-northstar-daily",
+      "resource_type": "AWS::Backup::BackupPlan",
+      "aws_account": "112233445566",
+      "aws_region": "us-east-1",
+      "status": "PARTIAL",
+      "severity": "HIGH",
+      "title": "Automated Backup Plan Configured but Formal Recovery Testing Evidence Absent",
+      "description": "AWS Backup daily snapshot rule covers RDS and DynamoDB with cross-region copy to us-west-2; however, automated technical scan confirms that actual recovery/restore testing requires independent manual workpaper verification.",
+      "technical_evidence": {
+        "backup_plan_name": "northstar-claims-daily-production-plan",
+        "schedule_expression": "cron(0 5 ? * * *)",
+        "delete_after_days": 35,
+        "copy_actions": [
+          {
+            "DestinationVaultArn": "arn:aws:backup:us-west-2:112233445566:backup-vault:dr-vault"
+          }
+        ],
+        "recovery_testing_status": "MANUAL_VALIDATION_REQUIRED",
+        "audit_methodology_note": "Technical scanner cannot assert recovery effectiveness based solely on backup presence. Auditor must inspect documented test restore execution logs."
+      },
+      "evidence_timestamp": "2026-11-12T19:23:49.846962+00:00",
+      "finding_reference": "AWS-BCP-001",
+      "risk_recommendation": "Execute and document quarterly test restores of production claims databases into isolated test VPC.",
+      "limitation_or_error": null,
+      "is_simulated": true
+    }
+  ],
+  "evidence_register": [
+    {
+      "evidence_id": "EVD-IAM-01-IAM-ROOT-01",
+      "title": "Evidence Workpaper: Root Account Hardware/Virtual MFA Enforcement",
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-ROOT-01",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "caa5ba327bf3ccb81be81f78a1c9d34fd1b78958d1f0bf06043227a2c38119e0",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"account_mfa_enabled\": true, \"last_root_login\": \"2026-09-14T08:12:00Z (Emergency Break-Glass Drill)\", \"mfa_type\": \"Hardware TOTP (Gemalto)\", \"root_access_keys_count\": 0}",
+      "raw_payload": {
+        "account_mfa_enabled": true,
+        "mfa_type": "Hardware TOTP (Gemalto)",
+        "root_access_keys_count": 0,
+        "last_root_login": "2026-09-14T08:12:00Z (Emergency Break-Glass Drill)"
+      }
+    },
+    {
+      "evidence_id": "EVD-IAM-01-IAM-02",
+      "title": "Evidence Workpaper: Console Access Enabled for Privileged Identity Without Active MFA",
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-02",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "92059c5e5ebdfee91add85146abf7e8eef80680fd6dd61d31ee2eeff4aaf210b",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"attached_policies\": [\"arn:aws:iam::aws:policy/PowerUserAccess\"], \"mfa_devices\": [], \"password_enabled\": true, \"password_last_used\": \"2026-11-08T14:22:18Z\", \"user_name\": \"claims-lead-dev\"}",
+      "raw_payload": {
+        "user_name": "claims-lead-dev",
+        "password_enabled": true,
+        "password_last_used": "2026-11-08T14:22:18Z",
+        "mfa_devices": [],
+        "attached_policies": [
+          "arn:aws:iam::aws:policy/PowerUserAccess"
+        ]
+      }
+    },
+    {
+      "evidence_id": "EVD-IAM-01-IAM-01",
+      "title": "Evidence Workpaper: Excessive Wildcard Administrator Privileges Assigned to CI/CD Pipeline Role",
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-01",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "3bbf6d6d7f01ef7d21181f64d3071e31bfaf84b039c235852868263b0e7eaa44",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"attached_policies\": [\"arn:aws:iam::aws:policy/AdministratorAccess\"], \"inline_policies\": {}, \"role_name\": \"ClaimsPipelineDeployerRole\", \"trust_principal\": \"arn:aws:iam::112233445566:oidc-provider/token.actions.githubusercontent.com\"}",
+      "raw_payload": {
+        "role_name": "ClaimsPipelineDeployerRole",
+        "attached_policies": [
+          "arn:aws:iam::aws:policy/AdministratorAccess"
+        ],
+        "inline_policies": {},
+        "trust_principal": "arn:aws:iam::112233445566:oidc-provider/token.actions.githubusercontent.com"
+      }
+    },
+    {
+      "evidence_id": "EVD-IAM-01-IAM-03",
+      "title": "Evidence Workpaper: Microservice Execution Role Trust Boundary and Scoped Actions",
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-03",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "e39aba8554083d127716fe90fb88ba3d7c30091b52751f8a750cd1de373a38b8",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"allowed_actions\": [\"sqs:ReceiveMessage\", \"sqs:DeleteMessage\", \"dynamodb:PutItem\", \"logs:CreateLogStream\"], \"role_name\": \"ClaimsLambdaExecutionRole\", \"trust_policy_service\": \"lambda.amazonaws.com\", \"wildcard_resources\": false}",
+      "raw_payload": {
+        "role_name": "ClaimsLambdaExecutionRole",
+        "trust_policy_service": "lambda.amazonaws.com",
+        "allowed_actions": [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "dynamodb:PutItem",
+          "logs:CreateLogStream"
+        ],
+        "wildcard_resources": false
+      }
+    },
+    {
+      "evidence_id": "EVD-IAM-01-IAM-04",
+      "title": "Evidence Workpaper: Service Account Access Key Age Exceeds Recommended 90-Day Rotation",
+      "control_id": "CTL-IAM-01",
+      "test_id": "IAM-04",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "08f3ebb69c8da7b02ebfca27e572aa10e4e12f6cae1de516e545259286385259",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"access_key_id\": \"AKIAEXAMPLE004B\", \"age_days\": 142, \"create_date\": \"2026-06-23T10:00:00Z\", \"last_used_service\": \"s3\", \"status\": \"Active\", \"user_name\": \"claims-batch-svc\"}",
+      "raw_payload": {
+        "user_name": "claims-batch-svc",
+        "access_key_id": "AKIAEXAMPLE004B",
+        "create_date": "2026-06-23T10:00:00Z",
+        "age_days": 142,
+        "last_used_service": "s3",
+        "status": "Active"
+      }
+    },
+    {
+      "evidence_id": "EVD-S3-01-DATA-01",
+      "title": "Evidence Workpaper: S3 Claims Archive Bucket Missing Bucket-Level Public Access Block (Mitigated by Account PAB)",
+      "control_id": "CTL-DATA-01",
+      "test_id": "DATA-01",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "47d184c774fedb3fafdba16be383c1b8b86dd95b7de4c8e7d60507ec5ee990a4",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"BlockPublicAcls\": true, \"BlockPublicPolicy\": false, \"IgnorePublicAcls\": true, \"RestrictPublicBuckets\": false, \"account_level_pab_effective\": true, \"audit_methodology_note\": \"Evaluated under IIA standards distinguishing direct exploitability from se...",
+      "raw_payload": {
+        "bucket_name": "northstar-claims-documents-archive-prod",
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": false,
+        "RestrictPublicBuckets": false,
+        "account_level_pab_effective": true,
+        "false_positive_analysis": "Account-level PAB blocks public traffic. Severity calibrated from Critical to Medium Significant Deficiency.",
+        "audit_methodology_note": "Evaluated under IIA standards distinguishing direct exploitability from secondary hardening gaps."
+      }
+    },
+    {
+      "evidence_id": "EVD-S3-01-DATA-02",
+      "title": "Evidence Workpaper: S3 Web Static Assets Bucket Public Boundary & CloudFront OAI/OAC",
+      "control_id": "CTL-DATA-01",
+      "test_id": "DATA-02",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "277daab1754bab4837f7ea03393e3cb806b8ab1b9c2ba63dcb5f1647c801e55f",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"all_pab_flags_true\": true, \"bucket_name\": \"northstar-claims-app-assets-prod\", \"origin_access_control\": \"arn:aws:cloudfront::112233445566:origin-access-control/E2VEXAMPLETWO\", \"ssl_enforced\": true}",
+      "raw_payload": {
+        "bucket_name": "northstar-claims-app-assets-prod",
+        "all_pab_flags_true": true,
+        "origin_access_control": "arn:aws:cloudfront::112233445566:origin-access-control/E2VEXAMPLETWO",
+        "ssl_enforced": true
+      }
+    },
+    {
+      "evidence_id": "EVD-S3-01-DATA-03",
+      "title": "Evidence Workpaper: S3 Audit Logs Storage Immortality & Object Lock Verification",
+      "control_id": "CTL-DATA-01",
+      "test_id": "DATA-03",
+      "source": "AWS API (global)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "3be748c8119346e6b1d85aad1a7ab93eb0f572c78d5ad160b1b737fee32bff30",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"bucket_name\": \"northstar-claims-audit-logs-vault\", \"mfa_delete\": \"Enabled\", \"object_lock_enabled\": true, \"retention_mode\": \"COMPLIANCE\", \"retention_period_days\": 365, \"versioning_status\": \"Enabled\"}",
+      "raw_payload": {
+        "bucket_name": "northstar-claims-audit-logs-vault",
+        "object_lock_enabled": true,
+        "retention_mode": "COMPLIANCE",
+        "retention_period_days": 365,
+        "versioning_status": "Enabled",
+        "mfa_delete": "Enabled"
+      }
+    },
+    {
+      "evidence_id": "EVD-KMS-01-KMS-01",
+      "title": "Evidence Workpaper: Customer Managed KMS Master Key Missing Automated Key Rotation",
+      "control_id": "CTL-ENC-01",
+      "test_id": "KMS-01",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "87a33080c52e8e10e0df0bfc6e6c5150386519e932f3b417d0b5cbf996f935aa",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"CreationDate\": \"2025-01-10T12:00:00Z\", \"Description\": \"Claims Platform Primary CMK (PII and Financial Records)\", \"KeyId\": \"b498f82a-e837-4d92-965a-claimscrypto01\", \"KeyRotationEnabled\": false, \"KeySpec\": \"SYMMETRIC_DEFAULT\", \"KeyState\": \"Enabled\", ...",
+      "raw_payload": {
+        "KeyId": "b498f82a-e837-4d92-965a-claimscrypto01",
+        "Description": "Claims Platform Primary CMK (PII and Financial Records)",
+        "KeyRotationEnabled": false,
+        "KeyState": "Enabled",
+        "CreationDate": "2025-01-10T12:00:00Z",
+        "KeySpec": "SYMMETRIC_DEFAULT",
+        "Origin": "AWS_KMS",
+        "supports_rotation": true,
+        "false_positive_analysis": "Confirmed key is symmetric AWS_KMS key eligible for rotation. Valid exception."
+      }
+    },
+    {
+      "evidence_id": "EVD-KMS-01-KMS-02",
+      "title": "Evidence Workpaper: Audit Trail CMK Policy Separation and Rotation Compliance",
+      "control_id": "CTL-ENC-01",
+      "test_id": "KMS-02",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "66658e630f52baaeb72f610ead8c17725b15ff70bad46cd55b35ee9d4ed028f4",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"KeyId\": \"f331c19d-761a-4c91-912b-auditlogkey02\", \"KeyPolicySeparation\": \"Verified dual-custody administrator delegation\", \"KeyRotationEnabled\": true, \"KeyState\": \"Enabled\"}",
+      "raw_payload": {
+        "KeyId": "f331c19d-761a-4c91-912b-auditlogkey02",
+        "KeyRotationEnabled": true,
+        "KeyState": "Enabled",
+        "KeyPolicySeparation": "Verified dual-custody administrator delegation"
+      }
+    },
+    {
+      "evidence_id": "EVD-KMS-01-KMS-03",
+      "title": "Evidence Workpaper: Asymmetric Signing Key Ineligible for Automated AWS Key Rotation",
+      "control_id": "CTL-ENC-01",
+      "test_id": "KMS-03",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "f3e6256d30e9af378e6a1a6183c87b51ad201c704251d112a4f53cc2136cc131",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"KeyId\": \"e991204a-8120-410a-88aa-claimssignkey03\", \"KeySpec\": \"RSA_2048\", \"KeyUsage\": \"SIGN_VERIFY\", \"Origin\": \"AWS_KMS\", \"audit_conclusion\": \"Classified as NOT_APPLICABLE rather than FAIL, eliminating false-positive scan defect.\"}",
+      "raw_payload": {
+        "KeyId": "e991204a-8120-410a-88aa-claimssignkey03",
+        "KeySpec": "RSA_2048",
+        "KeyUsage": "SIGN_VERIFY",
+        "Origin": "AWS_KMS",
+        "audit_conclusion": "Classified as NOT_APPLICABLE rather than FAIL, eliminating false-positive scan defect."
+      }
+    },
+    {
+      "evidence_id": "EVD-TRAIL-01-LOG-01",
+      "title": "Evidence Workpaper: CloudTrail Incomplete Multi-Region Global Service Data Event Coverage",
+      "control_id": "CTL-LOG-01",
+      "test_id": "LOG-01",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "1c34a6af58a2169b33706c8e5697958c28e7ab1b2a9507033137f2a7ad69a6be",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"IsLogging\": true, \"IsMultiRegionTrail\": true, \"KmsKeyId\": \"arn:aws:kms:us-east-1:112233445566:key/f331c19d-761a-4c91-912b-auditlogkey02\", \"LambdaDataEventsEnabled\": false, \"LogFileValidationEnabled\": true, \"ManagementEvents\": true, \"S3DataEventsEna...",
+      "raw_payload": {
+        "TrailARN": "arn:aws:cloudtrail:us-east-1:112233445566:trail/northstar-primary-org-trail",
+        "IsMultiRegionTrail": true,
+        "IsLogging": true,
+        "LogFileValidationEnabled": true,
+        "KmsKeyId": "arn:aws:kms:us-east-1:112233445566:key/f331c19d-761a-4c91-912b-auditlogkey02",
+        "ManagementEvents": true,
+        "S3DataEventsEnabled": false,
+        "LambdaDataEventsEnabled": false
+      }
+    },
+    {
+      "evidence_id": "EVD-MON-01-MON-01",
+      "title": "Evidence Workpaper: Amazon GuardDuty Continuous Machine-Learning Threat Detection Active",
+      "control_id": "CTL-MON-01",
+      "test_id": "MON-01",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "e665277e3ed424fde614b72ce31e9e5365472be4511798dd49d6d970b3dca211",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"detector_id\": \"12a849f2b874382e\", \"features\": [{\"name\": \"S3_DATA_EVENTS\", \"status\": \"ENABLED\"}, {\"name\": \"EKS_AUDIT_LOGS\", \"status\": \"ENABLED\"}, {\"name\": \"RUNTIME_MONITORING\", \"status\": \"ENABLED\"}], \"finding_publishing_frequency\": \"FIFTEEN_MINUTES\"...",
+      "raw_payload": {
+        "detector_id": "12a849f2b874382e",
+        "status": "ENABLED",
+        "finding_publishing_frequency": "FIFTEEN_MINUTES",
+        "features": [
+          {
+            "name": "S3_DATA_EVENTS",
+            "status": "ENABLED"
+          },
+          {
+            "name": "EKS_AUDIT_LOGS",
+            "status": "ENABLED"
+          },
+          {
+            "name": "RUNTIME_MONITORING",
+            "status": "ENABLED"
+          }
+        ]
+      }
+    },
+    {
+      "evidence_id": "EVD-MON-01-MON-02",
+      "title": "Evidence Workpaper: AWS Config Continuous Resource State and Compliance Tracking Active",
+      "control_id": "CTL-MON-01",
+      "test_id": "MON-02",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.844950+00:00",
+      "sha256_hash": "dbf51ba203d444a1a6e0ebf2ea870ca2bffb1ed8fe9d1e8f2aa4709be4368357",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"all_supported_resources\": true, \"include_global_resource_types\": true, \"last_successful_delivery_time\": \"2026-11-12T12:00:00Z\", \"recorder_name\": \"default\", \"recording\": true}",
+      "raw_payload": {
+        "recorder_name": "default",
+        "recording": true,
+        "all_supported_resources": true,
+        "include_global_resource_types": true,
+        "last_successful_delivery_time": "2026-11-12T12:00:00Z"
+      }
+    },
+    {
+      "evidence_id": "EVD-MON-01-MON-03",
+      "title": "Evidence Workpaper: AWS Security Hub Foundational Security Best Practices Standard Active",
+      "control_id": "CTL-MON-01",
+      "test_id": "MON-03",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.846962+00:00",
+      "sha256_hash": "972abc29bdd7f3325d14a760d31156698d783fc445cd8a593ce1a51439f3b33d",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"hub_arn\": \"arn:aws:securityhub:us-east-1:112233445566:hub/default\", \"overall_security_score\": 87, \"subscribed_standards\": [\"arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/3.0.0\", \"arn:aws:securityhub:us-east-1::standards/aws-foundati...",
+      "raw_payload": {
+        "hub_arn": "arn:aws:securityhub:us-east-1:112233445566:hub/default",
+        "subscribed_standards": [
+          "arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/3.0.0",
+          "arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0"
+        ],
+        "overall_security_score": 87
+      }
+    },
+    {
+      "evidence_id": "EVD-EC2-01-NET-01",
+      "title": "Evidence Workpaper: Security Group Permits Inbound SSH (Port 22) from Public Internet",
+      "control_id": "CTL-NET-01",
+      "test_id": "NET-01",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.846962+00:00",
+      "sha256_hash": "50218430a5f276e147a1002359dd5cd755523d60fa6a47db4d983bde7fdf93d6",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"Description\": \"Legacy bastion host ingress rules\", \"GroupId\": \"sg-09827384aef1729b1\", \"GroupName\": \"northstar-claims-bastion-sg\", \"OffendingRule\": {\"CidrIp\": \"0.0.0.0/0\", \"FromPort\": 22, \"IpProtocol\": \"tcp\", \"ToPort\": 22}, \"VpcId\": \"vpc-018274a9bc8...",
+      "raw_payload": {
+        "GroupId": "sg-09827384aef1729b1",
+        "GroupName": "northstar-claims-bastion-sg",
+        "Description": "Legacy bastion host ingress rules",
+        "VpcId": "vpc-018274a9bc837190e",
+        "OffendingRule": {
+          "IpProtocol": "tcp",
+          "FromPort": 22,
+          "ToPort": 22,
+          "CidrIp": "0.0.0.0/0"
+        }
+      }
+    },
+    {
+      "evidence_id": "EVD-EC2-01-NET-02",
+      "title": "Evidence Workpaper: EBS Encryption by Default Active in Production Region",
+      "control_id": "CTL-NET-01",
+      "test_id": "NET-02",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.846962+00:00",
+      "sha256_hash": "49905dfa8d2f9cab3407eb2c999c25c0314caf5f520669c5fc7938319bad0f97",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"EbsEncryptionByDefault\": true, \"KmsKeyId\": \"arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01\"}",
+      "raw_payload": {
+        "EbsEncryptionByDefault": true,
+        "KmsKeyId": "arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01"
+      }
+    },
+    {
+      "evidence_id": "EVD-RDS-01-DATA-RDS-01",
+      "title": "Evidence Workpaper: Production RDS PostgreSQL Cluster Storage Encryption Active",
+      "control_id": "CTL-DATA-02",
+      "test_id": "DATA-RDS-01",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.846962+00:00",
+      "sha256_hash": "b06f8ab1a97f9db6d8559593c46e3b235b04696fd7bfb8639f6a24f873cc3a35",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"BackupRetentionPeriod\": 30, \"DBInstanceIdentifier\": \"northstar-claims-primary-pg\", \"Engine\": \"postgres\", \"EngineVersion\": \"15.4\", \"KmsKeyId\": \"arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01\", \"MultiAZ\": true, \"Publicl...",
+      "raw_payload": {
+        "DBInstanceIdentifier": "northstar-claims-primary-pg",
+        "Engine": "postgres",
+        "EngineVersion": "15.4",
+        "StorageEncrypted": true,
+        "KmsKeyId": "arn:aws:kms:us-east-1:112233445566:key/b498f82a-e837-4d92-965a-claimscrypto01",
+        "PubliclyAccessible": false,
+        "MultiAZ": true,
+        "BackupRetentionPeriod": 30
+      }
+    },
+    {
+      "evidence_id": "EVD-BCP-01-BCP-01",
+      "title": "Evidence Workpaper: Automated Backup Plan Configured but Formal Recovery Testing Evidence Absent",
+      "control_id": "CTL-BCP-01",
+      "test_id": "BCP-01",
+      "source": "AWS API (us-east-1)",
+      "collector": "Senior IT Auditor (Northstar Engagement)",
+      "collection_date": "2026-11-12T19:23:49.846962+00:00",
+      "sha256_hash": "d6aac908f67986a42683ace15d4374e8dc23c97442086005594d319e36c46203",
+      "is_confidential": true,
+      "is_sanitized": true,
+      "validation_status": "VALIDATED",
+      "content_sample": "{\"audit_methodology_note\": \"Technical scanner cannot assert recovery effectiveness based solely on backup presence. Auditor must inspect documented test restore execution logs.\", \"backup_plan_name\": \"northstar-claims-daily-production-plan\", \"copy_act...",
+      "raw_payload": {
+        "backup_plan_name": "northstar-claims-daily-production-plan",
+        "schedule_expression": "cron(0 5 ? * * *)",
+        "delete_after_days": 35,
+        "copy_actions": [
+          {
+            "DestinationVaultArn": "arn:aws:backup:us-west-2:112233445566:backup-vault:dr-vault"
+          }
+        ],
+        "recovery_testing_status": "MANUAL_VALIDATION_REQUIRED",
+        "audit_methodology_note": "Technical scanner cannot assert recovery effectiveness based solely on backup presence. Auditor must inspect documented test restore execution logs."
+      }
+    }
+  ]
+}
