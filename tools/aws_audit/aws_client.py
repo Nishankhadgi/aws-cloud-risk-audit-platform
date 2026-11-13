@@ -86,11 +86,14 @@ class SafeAWSClient:
                 caller_identity = sts.get_caller_identity()
                 self._account_id = caller_identity.get("Account", "UNKNOWN_ACCOUNT")
             except Exception as e:
-                logger.warning(
-                    f"Could not initialize active AWS session ({str(e)}). Falling back to sample mode."
+                # Live mode must fail closed. Never substitute simulated results
+                # after an authentication or session-initialization failure.
+                logger.error(
+                    "Could not initialize the requested live AWS session; refusing to run a sample assessment."
                 )
-                self.sample_mode = True
-                self._account_id = "112233445566"
+                raise RuntimeError(
+                    "Live AWS session initialization failed. Verify the selected profile and read-only credentials; no scan was run."
+                ) from e
 
     @property
     def account_id(self) -> str:
