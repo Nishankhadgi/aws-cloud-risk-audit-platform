@@ -8,6 +8,10 @@ A portfolio-grade, simulated internal audit workspace for a fictional organizati
 
 The interactive web application is intended to be hosted on Vercel. The hosted UI uses sample data. The Python scanner runs separately from the web application and must be run locally by an authorized user.
 
+## Project research and planning
+
+The project owner records **August 13, 2026** as the start of paper-based research and planning. See [Project Research & Planning](docs/project-research-and-planning.md) for the initial problem definition, architecture direction, AWS security objectives, framework research, and proposed roadmap. This is a retrospective planning record; the Git commit date reflects when the documentation was actually added.
+
 ## Application features
 
 - Executive audit dashboard with control and risk summaries.
